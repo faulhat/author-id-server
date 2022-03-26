@@ -1,14 +1,18 @@
-<form method="post">
-    {% for field in fields %}
-        <label for="{{ field.name }}">{{ field.label }}:</label><br>
-        <input name="{{ field.name }}" type="{{ field.mytype }}"><br>
-        {% if field.errors|length > 0 %}
-            <ul id="{{ field.name }}-errors" class="errors">
-                {% for error in field.errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
+<form method="post" enctype="multipart/form-data">
+    {% for field in form %}
+        {% if field.type == "SubmitField" or field.type == "CSRFTokenField" %}
+            <!-- Don't display a label -->
+            {{ field }}<br>
+        {% else %}
+            {{ field.label }}<br>
+            {{ field }}<br>
+            {% if field.errors %}
+                <ul class="errors">
+                    {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}<br>
         {% endif %}
     {% endfor %}
-    <input type="submit" value="Create user">
 </form>
