@@ -9,8 +9,15 @@
     </head>
 
     <body class="windows-scrollbar">
-        <div class="container card mb-4" id="page-content">
-            {% block content %}{% endblock %}
+        <div class="container card mb-4">
+            <div class="card-header">
+                <div class="content-container">
+                    <h3 class="my-0 font-weight-normal card-header">{% block head %}{% endblock %}</h3>
+                </div>
+            </div>
+            <div class="content-container card-body">
+                {% block content %}{% endblock %}
+            </div>
         </div>
     </body>
 </html>

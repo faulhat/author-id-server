@@ -1,7 +1,5 @@
 #!/bin/bash
 
-cp win95.css/ app/static/ -r
-
 mkdir -p config
 
 echo "{

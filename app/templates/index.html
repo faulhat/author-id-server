@@ -2,12 +2,17 @@
 
 {% block title %} Home {% endblock %}
 
+{% block head %} Home {% endblock %}
+
 {% block content %}
-    <h2>
-        {% if user %}
-            Signed in as {{ user.name }}
-        {% else %}
-            Not signed in
-        {% endif %}
-    </h2>
+    {% if user %}
+        Signed in as {{ user.name }}<br><br>
+
+        <a href="{{ url_for('userviews.userlogout') }}">Log out</a><br>
+    {% else %}
+        Not signed in<br><br>
+
+        <a href="{{ url_for('userviews.userlogin') }}">Log in</a><br>
+        <a href="{{ url_for('userviews.createuser') }}">Create account</a><br>
+    {% endif %}
 {% endblock %}
