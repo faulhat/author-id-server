@@ -4,6 +4,7 @@
     This module is kind of like a conductor that coordinates them all.
 """
 
+import json
 import sys
 import secrets
 import os
@@ -19,6 +20,18 @@ KEYFILE = os.path.join(CONF_DIR, "key.txt")
 CONFIG = os.path.join(CONF_DIR, "config.json")
 DB_PATH = "authorid.db"
 
+
+# Load configuration
+# Provide default settings if no config.json is found
+def get_config(config_path: str) -> dict:
+    if os.path.exists(config_path):
+        with open(config_path, "r") as config:
+            return json.load(config)
+    
+    return {
+        "port": 5001,
+        "modelServerPort": 5000,
+    }
 
 # Ensure that there is a viable secret key for the app to use for session encryption
 def ensure_secret_key(forApp: Flask, keypath: str) -> None:
@@ -55,19 +68,24 @@ def create_app() -> Flask:
 if __name__ == "__main__":
     # Pass "debug" flag in bash to reset the database before and after each run
     flag_debug = "debug" in sys.argv
+    
+    app = create_app()
+    app.app_context().push()
+
+    if flag_debug:
+        db.drop_all()
+        
     try:
-        app = create_app()
-        app.app_context().push()
-
-        if flag_debug:
-            db.drop_all()
-
         os.makedirs(CONF_DIR, exist_ok=True)
-
         ensure_secret_key(app, KEYFILE)
-
         db.create_all()
-        app.run(debug=flag_debug)
+
+        settings = get_config(CONFIG)
+        port = settings.get("port")
+        if port is None or not isinstance(port, int):
+            app.run(port=5001, debug=flag_debug)
+        else:
+            app.run(port=port, debug=flag_debug)
     except:
         if flag_debug:
             db.drop_all()
