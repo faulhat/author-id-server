@@ -1,18 +1,22 @@
-<form method="post" enctype="multipart/form-data">
-    {% for field in form %}
-        {% if field.type == "SubmitField" or field.type == "CSRFTokenField" %}
-            <!-- Don't display a label -->
-            {{ field }}<br>
-        {% else %}
-            {{ field.label }}<br>
-            {{ field }}<br>
-            {% if field.errors %}
-                <ul class="errors">
-                    {% for error in field.errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}<br>
-        {% endif %}
-    {% endfor %}
-</form>
+<div class="content-container list-group">
+    <form method="post" enctype="multipart/form-data" class="content-container">
+        {% for field in form %}
+            <div class="list-item">
+            {% if field.type == "SubmitField" or field.type == "CSRFTokenField" %}
+                <!-- Don't display a label -->
+                {{ field }}<br>
+            {% else %}
+                {{ field.label }}<br>
+                {{ field }}<br>
+                {% if field.errors %}
+                    <ul>
+                        {% for error in field.errors %}
+                            <li class="list-item">{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endif %}
+            </div><br>
+        {% endfor %}
+    </form>
+</div>

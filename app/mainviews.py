@@ -13,4 +13,7 @@ mainviews = Blueprint("mainviews", __name__, template_folder="templates/")
 
 @mainviews.route("/")
 def index() -> Response:
-    return render_template("index.html", user=current_user)
+    if current_user.is_authenticated:
+        return render_template("index.html", user=current_user)
+    
+    return render_template("index.html")

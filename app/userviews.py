@@ -54,7 +54,7 @@ def userlogin() -> Response:
         if req_user is None:
             form.email.errors.append("Email not registered!")
         else:
-            if check_password_hash(req_user.pw_hash, form.password):
+            if check_password_hash(req_user.pw_hash, form.password.data):
                 login_user(req_user, remember=True)
                 return redirect(url_for("mainviews.index"))
             else:

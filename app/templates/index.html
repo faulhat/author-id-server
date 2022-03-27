@@ -3,5 +3,11 @@
 {% block title %} Home {% endblock %}
 
 {% block content %}
-    <h2>Signed in as {{ user.name }}</h2>
+    <h2>
+        {% if user %}
+            Signed in as {{ user.name }}
+        {% else %}
+            Not signed in
+        {% endif %}
+    </h2>
 {% endblock %}
