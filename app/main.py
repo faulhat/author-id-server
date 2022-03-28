@@ -65,6 +65,11 @@ def create_app() -> Flask:
     return app
 
 
+# Get settings from config file. This is outside the main block because the settings should
+# be globally accessible
+settings = get_config(CONFIG)
+
+
 if __name__ == "__main__":
     # Pass "debug" flag in bash to reset the database before and after each run
     flag_debug = "debug" in sys.argv
@@ -80,7 +85,6 @@ if __name__ == "__main__":
         ensure_secret_key(app, KEYFILE)
         db.create_all()
 
-        settings = get_config(CONFIG)
         port = settings.get("port")
         if port is None or not isinstance(port, int):
             app.run(port=5001, debug=flag_debug)

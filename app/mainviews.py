@@ -15,5 +15,5 @@ mainviews = Blueprint("mainviews", __name__, template_folder="templates/")
 def index() -> Response:
     if current_user.is_authenticated:
         return render_template("index.html", user=current_user)
-    
+
     return render_template("index.html")
