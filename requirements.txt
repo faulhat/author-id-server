@@ -1,7 +1,9 @@
 autopep8==1.6.0
 bcrypt==3.2.0
 blinker==1.4
+certifi==2021.10.8
 cffi==1.15.0
+charset-normalizer==2.0.12
 click==8.0.4
 cryptography==36.0.2
 dnspython==2.2.1
@@ -10,6 +12,7 @@ Flask==2.0.3
 Flask-Login==0.5.0
 Flask-Mail==0.9.1
 Flask-SQLAlchemy==2.5.1
+Flask-Uploads==0.2.1
 Flask-User==1.0.2.2
 Flask-WTF==1.0.0
 greenlet==1.1.2
@@ -18,10 +21,16 @@ itsdangerous==2.1.2
 Jinja2==3.1.0
 MarkupSafe==2.1.1
 passlib==1.7.4
+Pillow==9.0.1
 pycodestyle==2.8.0
 pycparser==2.21
+python-magic==0.4.25
+requests==2.27.1
 six==1.16.0
 SQLAlchemy==1.4.32
+sqlalchemy-media==0.17.4
 toml==0.10.2
+urllib3==1.26.9
+Wand==0.6.7
 Werkzeug==2.0.3
 WTForms==3.0.1
