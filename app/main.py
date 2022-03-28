@@ -10,10 +10,7 @@ import secrets
 import os
 
 from flask import Flask
-
-from .models import db
-from .userviews import login_manager, userviews
-from .mainviews import mainviews
+from flask_sqlalchemy import SQLAlchemy
 
 CONF_DIR = "config/"
 KEYFILE = os.path.join(CONF_DIR, "key.txt")
@@ -27,11 +24,12 @@ def get_config(config_path: str) -> dict:
     if os.path.exists(config_path):
         with open(config_path, "r") as config:
             return json.load(config)
-    
+
     return {
         "port": 5001,
         "modelServerPort": 5000,
     }
+
 
 # Ensure that there is a viable secret key for the app to use for session encryption
 def ensure_secret_key(forApp: Flask, keypath: str) -> None:
@@ -47,11 +45,17 @@ def ensure_secret_key(forApp: Flask, keypath: str) -> None:
             forApp.secret_key = keyfile.read()
 
 
-# Initialize the Flask app
-def create_app() -> Flask:
+def create_app(db_path: str) -> tuple[Flask, SQLAlchemy]:
+    from .userviews import login_manager, userviews
+    from .mainviews import mainviews
+    from .evaluation import evalviews
+
+    # Initialize database connection
+    from .models import db
+
     # Create and configure Flask object
     app = Flask(__name__)
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + DB_PATH
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + db_path
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # Initialize database mediator objects
@@ -61,8 +65,10 @@ def create_app() -> Flask:
     # Incorporate the userviews and mainviews modules
     app.register_blueprint(userviews, url_prefix="/users")
     app.register_blueprint(mainviews)
+    app.register_blueprint(evalviews, url_prefix="/eval")
+    app.app_context().push()
 
-    return app
+    return app, db
 
 
 # Get settings from config file. This is outside the main block because the settings should
@@ -73,13 +79,11 @@ settings = get_config(CONFIG)
 if __name__ == "__main__":
     # Pass "debug" flag in bash to reset the database before and after each run
     flag_debug = "debug" in sys.argv
-    
-    app = create_app()
-    app.app_context().push()
 
+    app, db = create_app(DB_PATH)
     if flag_debug:
         db.drop_all()
-        
+
     try:
         os.makedirs(CONF_DIR, exist_ok=True)
         ensure_secret_key(app, KEYFILE)
@@ -93,5 +97,5 @@ if __name__ == "__main__":
     except:
         if flag_debug:
             db.drop_all()
-        
+
         raise

@@ -3,32 +3,19 @@
     by the flask-sqlalchemy package.
 """
 
+import hashlib
+import os
+from typing import BinaryIO
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
-from sqlalchemy_media import Image, ImageAnalyzer, ImageProcessor, ImageValidator
+from PIL import Image
 
 from .main import settings
 
 
 TEMP_PATH = settings["tempdir"]
+DATA_PATH = os.path.join("app/", "data/")
 db = SQLAlchemy()
-
-
-class Sample(Image):
-    __pre_processors__ = [
-        ImageAnalyzer(),
-        ImageValidator(
-            minimum=(560, 400),
-            maximum=(2240, 1600),
-            min_aspect_ratio=1.0,
-            content_types=['image/jpeg', 'image/png']
-        ),
-        ImageProcessor(
-            fmt='jpeg',
-            width=1120,
-            height=800,
-        )
-    ]
 
 
 class User(UserMixin, db.Model):
@@ -38,22 +25,59 @@ class User(UserMixin, db.Model):
     email = db.Column(db.Text, unique=True, nullable=False)
     name = db.Column(db.Text, nullable=False)
     pw_hash = db.Column(db.String(100), nullable=False)
-    evals = db.relationship("SampleEval", back_populates="user")
+    images = db.relationship("SampleEval", back_populates="user")
 
 
 class SampleEval(db.Model):
-    __tablename__ = "sample_eval"
-    
+    __tablename__ = "sample"
+
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    user = db.relationship("User", back_populates="evals")
+    image_id = db.Column(db.Integer, db.ForeignKey("image.id"))
+    image = db.relationship("UserImage", back_populates="sample")
 
     # Name of this handwriting sample's known author
     name = db.Column(db.Text, nullable=False)
 
-    # Image for the sample
-    image = db.Column(Sample.as_mutable(db.Json), nullable=False)
-
     # Fingerprint of the sample
-    eval_array = db.Column(db.Json, nullable=False)
+    fingerprint = db.Column(db.PickleType, nullable=False)
 
+
+class UserImage(db.Model):
+    __tablename__ = "image"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user = db.relationship("User", back_populates="images")
+
+    # Image for the sample as filename
+    image_path = db.Column(db.Text, nullable=False)
+    thumbnail_path = db.Column(db.Text, nullable=False)
+
+    sample = db.relationship("SampleEval", back_populates="image", uselist=False)
+
+    def __init__(self, user: User, image_fp: BinaryIO, filename: str):
+        super(db.Model, self).__init__()
+        self.user = user
+        directory = os.path.join(DATA_PATH, str(user.id))
+        os.makedirs(directory)
+
+        # Generate a path unique enough that collisions are impossible
+        digest = hashlib.sha1(image_fp.read()).hexdigest()
+        new_filename = f"{filename}-{digest[:10]}"
+        self.image_path = os.path.join(directory, new_filename)
+        with open(self.image_path, "wb") as store_to:
+            store_to.write(image_fp.read())
+
+        self.thumbnail_path = new_filename + "thumbnail.png"
+        with Image.open(image_fp) as image:
+            factor: float
+            if image.size[0] > image.size[1]:
+                factor = 100 / image.size[0]
+            else:
+                factor = 100 / image.size[1]
+
+            thumbnail = image.resize(
+                (int(factor * image.size[0]), int(factor * image.size[1]))
+            )
+            with open(self.thumbnail_path, "wb") as store_to:
+                thumbnail.save(store_to)

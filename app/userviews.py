@@ -29,7 +29,9 @@ def createuser() -> Response:
             form.passconf.errors.append("Passwords don't match!")
             return render_template("users/create.html", form=form)
 
-        userexists = User.query.filter_by(email=form.email.data).one_or_none() is not None
+        userexists = (
+            User.query.filter_by(email=form.email.data).one_or_none() is not None
+        )
         if userexists:
             form.email.errors.append("Email already registered!")
         else:

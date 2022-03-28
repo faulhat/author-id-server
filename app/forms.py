@@ -22,7 +22,9 @@ def default_data_required() -> DataRequired:
 
 
 class NewUserForm(FlaskForm):
-    email = EmailField("Email address", validators=[default_data_required(), Email("Invalid email")])
+    email = EmailField(
+        "Email address", validators=[default_data_required(), Email("Invalid email")]
+    )
     name = StringField("Your name", validators=[default_data_required()])
     password = PasswordField("Password", validators=[default_data_required()])
     passconf = PasswordField("Confirm password", validators=[default_data_required()])
@@ -30,23 +32,33 @@ class NewUserForm(FlaskForm):
 
 
 class LoginForm(FlaskForm):
-    email = EmailField("User email", validators=[default_data_required(), Email("Invalid email")])
+    email = EmailField(
+        "User email", validators=[default_data_required(), Email("Invalid email")]
+    )
     password = PasswordField("Password", validators=[default_data_required()])
     submit = SubmitField("Log in")
 
 
 class LabelledSampleForm(FlaskForm):
-    name = StringField("Student name", validator[default_data_required()])
-    attachment = FileField("Sample image", validators=[
-        FileRequired("An image upload is required."),
-        FileAllowed(images, "Only image files are allowed.")])
-    
+    name = StringField("Student name", validators=[default_data_required()])
+    attachment = FileField(
+        "Sample image",
+        validators=[
+            FileRequired("An image upload is required."),
+            FileAllowed(images, "Only image files are allowed."),
+        ],
+    )
+
     submit = SubmitField("Upload sample")
 
 
 class UnlabelledSampleForm(FlaskForm):
-    attachment = FileField("Unlabelled image", validators=[
-        FileRequired("An image upload is required."),
-        FileAllowed(images, "Only image files are allowed.")])
-    
+    attachment = FileField(
+        "Unlabelled image",
+        validators=[
+            FileRequired("An image upload is required."),
+            FileAllowed(images, "Only image files are allowed."),
+        ],
+    )
+
     submit = SubmitField("Upload")

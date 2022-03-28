@@ -5,7 +5,9 @@
 """
 
 from flask import Blueprint, Response, render_template
-from flask_login import current_user
+from flask_login import current_user, login_required
+
+from .models import UserImage
 
 
 mainviews = Blueprint("mainviews", __name__, template_folder="templates/")
@@ -17,3 +19,21 @@ def index() -> Response:
         return render_template("index.html", user=current_user)
 
     return render_template("index.html")
+
+
+@mainviews.route("/image/<int:id>")
+@login_required
+def get_image(image_id: int) -> Response:
+    image = current_user.images.filter_by(UserImage.id == image_id).one_or_none()
+    if image is not None:
+        with open(image.image_path, "rb") as image_fp:
+            return Response(image_fp.read())
+
+
+@mainviews.route("/image/<int:id>/thumbnail")
+@login_required
+def get_thumbnail(image_id: int) -> Response:
+    image = current_user.images.filter_by(UserImage.id == image_id).one_or_none()
+    if image is not None:
+        with open(image.thumbnail_path, "rb") as image_fp:
+            return Response(image_fp.read())
