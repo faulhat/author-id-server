@@ -9,12 +9,12 @@
 from wsgiref.validate import validator
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
-from flask_uploads import UploadSet, IMAGES
+from flask_uploads import UploadSet, IMAGES, extension
 from wtforms import EmailField, StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Email
 
 
-images = UploadSet("images", IMAGES)
+image_extensions = ["png", "jpg", "jpeg"]
 
 
 def default_data_required() -> DataRequired:
@@ -45,7 +45,7 @@ class LabelledSampleForm(FlaskForm):
         "Sample image",
         validators=[
             FileRequired("An image upload is required."),
-            FileAllowed(images, "Only image files are allowed."),
+            FileAllowed(image_extensions, "Only PNG and JPEG files are allowed."),
         ],
     )
 
@@ -57,7 +57,7 @@ class UnlabelledSampleForm(FlaskForm):
         "Unlabelled image",
         validators=[
             FileRequired("An image upload is required."),
-            FileAllowed(images, "Only image files are allowed."),
+            FileAllowed(image_extensions, "Only image files are allowed."),
         ],
     )
 

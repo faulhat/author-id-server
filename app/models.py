@@ -25,21 +25,12 @@ class User(UserMixin, db.Model):
     email = db.Column(db.Text, unique=True, nullable=False)
     name = db.Column(db.Text, nullable=False)
     pw_hash = db.Column(db.String(100), nullable=False)
-    images = db.relationship("SampleEval", back_populates="user")
-
-
-class SampleEval(db.Model):
-    __tablename__ = "sample"
-
-    id = db.Column(db.Integer, primary_key=True)
-    image_id = db.Column(db.Integer, db.ForeignKey("image.id"))
-    image = db.relationship("UserImage", back_populates="sample")
-
-    # Name of this handwriting sample's known author
-    name = db.Column(db.Text, nullable=False)
-
-    # Fingerprint of the sample
-    fingerprint = db.Column(db.PickleType, nullable=False)
+    images = db.relationship(
+        "UserImage", back_populates="user", cascade="all, delete-orphan"
+    )
+    samples = db.relationship(
+        "SampleEval", back_populates="user", cascade="all, delete-orphan"
+    )
 
 
 class UserImage(db.Model):
@@ -81,3 +72,25 @@ class UserImage(db.Model):
             )
             with open(self.thumbnail_path, "wb") as store_to:
                 thumbnail.save(store_to)
+
+
+class SampleEval(db.Model):
+    __tablename__ = "sample"
+
+    id = db.Column(db.Integer, primary_key=True)
+    image_id = db.Column(db.Integer, db.ForeignKey("image.id"))
+    image = db.relationship("UserImage", back_populates="sample")
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user = db.relationship("User", back_populates="samples")
+
+    # Name of this handwriting sample's known author
+    name = db.Column(db.Text, nullable=False)
+
+    # Fingerprint of the sample
+    fingerprint = db.Column(db.Text, nullable=False)
+
+    def __init__(self, image: UserImage, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.image = image
+        self.user = image.user

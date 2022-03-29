@@ -8,6 +8,10 @@
     {% if user %}
         Signed in as {{ user.name }}<br><br>
 
+        <a href="{{ url_for('evalviews.new_sample') }}">Upload new labelled sample</a><br>
+        <a href="{{ url_for('evalviews.query_model') }}">
+            Get a prediction on an unlabelled sample
+        </a><br>
         <a href="{{ url_for('userviews.userlogout') }}">Log out</a><br>
     {% else %}
         Not signed in<br><br>

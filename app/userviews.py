@@ -5,7 +5,7 @@
 
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask import Blueprint, Response, render_template, redirect, url_for
-from flask_login import LoginManager, login_required, login_user, logout_user
+from flask_login import LoginManager, login_user, logout_user, current_user
 
 from .forms import NewUserForm, LoginForm
 from .models import db, User
@@ -67,7 +67,8 @@ def userlogin() -> Response:
 
 
 @userviews.route("/logout")
-@login_required
 def userlogout() -> Response:
-    logout_user()
+    if current_user.is_authenticated:
+        logout_user()
+
     return redirect(url_for("mainviews.index"))

@@ -11,6 +11,7 @@ import os
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_uploads import configure_uploads
 
 CONF_DIR = "config/"
 KEYFILE = os.path.join(CONF_DIR, "key.txt")
