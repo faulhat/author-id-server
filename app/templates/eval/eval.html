@@ -1,10 +1,10 @@
-{% extends "base.html" %}
+{% extends "lower.html" %}
 
 {% block title %} Upload labelled {% endblock %}
 
 {% block head %} Upload new labelled sample {% endblock %}
 
-{% block content %}
+{% block inner %}
     {% include "form.html" with context %}
     
     {% if ranked %}

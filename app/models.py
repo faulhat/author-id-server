@@ -54,7 +54,7 @@ class UserImage(db.Model):
 
         # Generate a path unique enough that collisions are impossible
         digest = hashlib.sha1(image_fp.read()).hexdigest()
-        new_filename = f"{filename}-{digest[:10]}"
+        new_filename = f"{filename}-{digest[:10]}.png"
         self.image_path = os.path.join(directory, new_filename)
         with open(self.image_path, "wb") as store_to:
             store_to.write(image_fp.read())

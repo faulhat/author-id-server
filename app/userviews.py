@@ -4,7 +4,7 @@
 """
 
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask import Blueprint, Response, render_template, redirect, url_for
+from flask import Blueprint, Response, make_response, render_template, redirect, url_for
 from flask_login import LoginManager, login_user, logout_user, current_user
 
 from .forms import NewUserForm, LoginForm
@@ -43,7 +43,9 @@ def createuser() -> Response:
             login_user(newuser, remember=True)
             return redirect(url_for("mainviews.index"))
 
-    # We are either here because the request was a GET or there was an error
+        # There was an error
+        return make_response(render_template("users/create.html", form=form), 400)
+
     return render_template("users/create.html", form=form)
 
 
@@ -62,7 +64,9 @@ def userlogin() -> Response:
             else:
                 form.password.errors.append("Incorrect password!")
 
-    # We are either here because the request was a GET request or login failed.
+        # There was an error
+        return make_response(render_template("users/login.html", form=form), 400)
+
     return render_template("users/login.html", form=form)
 
 

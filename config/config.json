@@ -1,0 +1,7 @@
+{
+    "port": 8090,
+    "modelServerIP": "localhost",
+    "modelServerPort": 8080,
+    "tempdir": "app/tmp/",
+    "debug": true
+}

@@ -11,11 +11,8 @@ python3 -m venv .env
 source .env/bin/activate
 pip install -r requirements.txt
 
-# Generate default configuration
-./setup.sh
-
 # Execute main module in debug mode
 python -m app.main debug
 ```
 
-The app will serve on port 5001 by default.
+The app will serve on port 8090 by default. This can be changed in the config/config.json file.

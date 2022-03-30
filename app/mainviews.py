@@ -37,3 +37,18 @@ def get_thumbnail(image_id: int) -> Response:
     if image is not None:
         with open(image.thumbnail_path, "rb") as image_fp:
             return Response(image_fp.read())
+
+
+@mainviews.errorhandler(404)
+def not_found():
+    return render_template("error.html", err_msg="404! Page not found.")
+
+
+@mainviews.errorhandler(500)
+def internal_error():
+    return render_template("error.html", err_msg="500! Server error.")
+
+
+@mainviews.errorhandler(503)
+def access_denied():
+    return render_template("error.html", err_msg="503! Could not confirm access to this resource. Are you logged in?")

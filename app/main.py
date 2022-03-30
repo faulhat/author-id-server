@@ -79,7 +79,7 @@ settings = get_config(CONFIG)
 
 if __name__ == "__main__":
     # Pass "debug" flag in bash to reset the database before and after each run
-    flag_debug = "debug" in sys.argv
+    flag_debug = settings.get("debug")
 
     app, db = create_app(DB_PATH)
     if flag_debug:

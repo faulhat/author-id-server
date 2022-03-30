@@ -8,7 +8,7 @@ from typing import BinaryIO
 import requests
 import numpy as np
 
-from flask import Blueprint, Response, render_template
+from flask import Blueprint, Response, make_response, render_template
 from flask_login import current_user, login_required
 
 from .models import UserImage, db, SampleEval
@@ -21,7 +21,7 @@ evalviews = Blueprint("evalviews", __name__, template_folder="templates/")
 
 # Query the model to get a fingerprint for an image
 def get_img_fingerprint(image_fp: BinaryIO) -> list[float]:
-    query_url = f"http://{settings['modelServerIP']}:{settings['modelServerPort']}/eval"
+    query_url = f"http://{settings['modelServerIP']}:{settings['modelServerPort']}/"
     files = {"rq_image": image_fp}
     res = requests.post(query_url, files=files)
     print(res.text)
@@ -51,10 +51,10 @@ def new_sample() -> Response:
             db.session.add(new_eval)
             db.session.commit()
         except Exception:
-            return render_template(
+            return make_response(render_template(
                 "error.html",
                 err_msg="The ID model returned an invalid response! Could not process image.",
-            )
+            ), 500)
 
     return render_template("eval/labelled.html", form=form)
 
@@ -83,9 +83,9 @@ def query_model() -> Response:
             ranked = [(sample_evals[i], dist) for (i, dist) in distances]
             return render_template("eval/query.html", form=form, ranked=ranked)
         except Exception:
-            return render_template(
+            return make_response(render_template(
                 "error.html",
                 err_msg="The ID model returned an invalid response! Could not process image.",
-            )
+            ), 500)
 
     return render_template("eval/query.html", ranked=ranked)
