@@ -59,7 +59,7 @@ def new_sample() -> Response:
                 500,
             )
 
-    user_evals = SampleEval.query.filter(SampleEval.user == current_user).order_by(
+    user_evals = SampleEval.query.filter_by(user=current_user).order_by(
         SampleEval.timestamp.desc()
     )
     if user_evals.count() == 0:
@@ -89,6 +89,7 @@ def query_model() -> Response:
 
             # Produce a ranked list of labelled samples based on proximity to unlabelled upload
             ranked = [(sample_evals[i], dist) for (i, dist) in distances]
+            ranked = [r for (r, _) in ranked]
             return render_template("eval/query.html", form=form, ranked=ranked)
         except Exception:
             traceback.print_exc()
@@ -100,4 +101,4 @@ def query_model() -> Response:
                 500,
             )
 
-    return render_template("eval/query.html", ranked=ranked)
+    return render_template("eval/query.html", form=form)

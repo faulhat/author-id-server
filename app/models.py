@@ -53,19 +53,18 @@ class UserImage(db.Model):
         os.makedirs(directory, exist_ok=True)
 
         # Generate a path unique enough that collisions are impossible
-        digest = hashlib.sha1(image_fp.read()).hexdigest()
-        new_filename = f"{digest[:20]}.png"
-        self.image_path = os.path.join(directory, new_filename)
-        with open(self.image_path, "wb") as store_to:
-            store_to.write(image_fp.read())
-
-        self.thumbnail_path = self.image_path + "thumbnail.png"
+        digest = hashlib.sha1(image_fp.read()).hexdigest()[:20]
+        self.image_path = os.path.join(directory, f"{digest}.png")
+        self.thumbnail_path = os.path.join(directory, f"{digest}.thumbnail.png")
         with Image.open(image_fp) as image:
+            with open(self.image_path, "wb") as store_to:
+                image.save(store_to)
+
             factor: float
             if image.size[0] > image.size[1]:
-                factor = 100 / image.size[0]
+                factor = 400 / image.size[0]
             else:
-                factor = 100 / image.size[1]
+                factor = 400 / image.size[1]
 
             thumbnail = image.resize(
                 (int(factor * image.size[0]), int(factor * image.size[1]))

@@ -25,13 +25,13 @@ def index() -> Response:
 @login_required
 def get_image(image_id: int) -> Response:
     image = (
-        UserImage.query.filter_by(UserImage.id == image_id)
-        .filter_by(UserImage.user == current_user)
+        UserImage.query.filter_by(id=image_id)
+        .filter_by(user=current_user)
         .one_or_none()
     )
     if image is not None:
         with open(image.image_path, "rb") as image_fp:
-            return Response(image_fp.read())
+            return Response(image_fp.read(), mimetype="image")
 
     abort(404)
 
@@ -40,13 +40,13 @@ def get_image(image_id: int) -> Response:
 @login_required
 def get_thumbnail(image_id: int) -> Response:
     image = (
-        UserImage.query.filter_by(UserImage.id == image_id)
-        .filter_by(UserImage.user == current_user)
+        UserImage.query.filter_by(id=image_id)
+        .filter_by(user=current_user)
         .one_or_none()
     )
     if image is not None:
         with open(image.thumbnail_path, "rb") as image_fp:
-            return Response(image_fp.read())
+            return Response(image_fp.read(), mimetype="image")
 
     abort(404)
 
