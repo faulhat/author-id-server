@@ -1,5 +1,19 @@
-{% extends "hasform.html" %}
+{% extends "base.html" %}
 
 {% block title %} Upload labelled {% endblock %}
 
 {% block head %} Upload new labelled sample {% endblock %}
+
+{% block content %}
+    <a href="/">Go home</a>
+
+    {% include "form.html" with context %}
+
+    {% if list_evals %}
+        <ul class="list-group">
+            {% for evaluation in list_evals %}
+                {% include "eval/render_eval.html" with context %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "lower.html" %}
+
+{% block title %} Upload labelled {% endblock %}
+
+{% block head %} Upload new labelled sample {% endblock %}
+
+{% block inner %}
+    {% include "form.html" with context %}
+    
+    {% if ranked %}
+        <ol class="list-group">
+            {% for evaluation in ranked %}
+                {% include "eval/render_eval.html" with context %}
+            {% endfor %}
+        </ol>
+    {% endif %}
+{% endblock %}

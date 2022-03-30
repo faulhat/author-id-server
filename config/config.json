@@ -3,5 +3,7 @@
     "modelServerIP": "localhost",
     "modelServerPort": 8080,
     "tempdir": "app/tmp/",
+    "datadir": "app/data/",
+    "db_uri": "sqlite:///authorid.db",
     "debug": true
 }

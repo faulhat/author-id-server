@@ -14,7 +14,7 @@ from .main import settings
 
 
 TEMP_PATH = settings["tempdir"]
-DATA_PATH = os.path.join("app/", "data/")
+DATA_PATH = settings["datadir"]
 db = SQLAlchemy()
 
 
@@ -41,25 +41,25 @@ class UserImage(db.Model):
     user = db.relationship("User", back_populates="images")
 
     # Image for the sample as filename
-    image_path = db.Column(db.Text, nullable=False)
-    thumbnail_path = db.Column(db.Text, nullable=False)
+    image_path = db.Column(db.Text)
+    thumbnail_path = db.Column(db.Text)
 
     sample = db.relationship("SampleEval", back_populates="image", uselist=False)
 
-    def __init__(self, user: User, image_fp: BinaryIO, filename: str):
+    def __init__(self, user: User, image_fp: BinaryIO):
         super(db.Model, self).__init__()
         self.user = user
         directory = os.path.join(DATA_PATH, str(user.id))
-        os.makedirs(directory)
+        os.makedirs(directory, exist_ok=True)
 
         # Generate a path unique enough that collisions are impossible
         digest = hashlib.sha1(image_fp.read()).hexdigest()
-        new_filename = f"{filename}-{digest[:10]}.png"
+        new_filename = f"{digest[:20]}.png"
         self.image_path = os.path.join(directory, new_filename)
         with open(self.image_path, "wb") as store_to:
             store_to.write(image_fp.read())
 
-        self.thumbnail_path = new_filename + "thumbnail.png"
+        self.thumbnail_path = self.image_path + "thumbnail.png"
         with Image.open(image_fp) as image:
             factor: float
             if image.size[0] > image.size[1]:
@@ -82,6 +82,7 @@ class SampleEval(db.Model):
     image = db.relationship("UserImage", back_populates="sample")
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     user = db.relationship("User", back_populates="samples")
+    timestamp = db.Column(db.DateTime, server_default=db.func.now())
 
     # Name of this handwriting sample's known author
     name = db.Column(db.Text, nullable=False)

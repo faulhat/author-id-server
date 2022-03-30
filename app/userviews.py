@@ -23,7 +23,6 @@ def load_user(user_id: str) -> User:
 @userviews.route("/new", methods=["GET", "POST"])
 def createuser() -> Response:
     form = NewUserForm()
-
     if form.validate_on_submit():
         if form.password.data != form.passconf.data:
             form.passconf.errors.append("Passwords don't match!")
@@ -52,7 +51,6 @@ def createuser() -> Response:
 @userviews.route("/login", methods=["GET", "POST"])
 def userlogin() -> Response:
     form = LoginForm()
-
     if form.validate_on_submit():
         req_user = User.query.filter_by(email=form.email.data).one_or_none()
         if req_user is None:

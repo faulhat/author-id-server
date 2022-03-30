@@ -20,16 +20,9 @@ DB_PATH = "authorid.db"
 
 
 # Load configuration
-# Provide default settings if no config.json is found
 def get_config(config_path: str) -> dict:
-    if os.path.exists(config_path):
-        with open(config_path, "r") as config:
-            return json.load(config)
-
-    return {
-        "port": 5001,
-        "modelServerPort": 5000,
-    }
+    with open(config_path, "r") as config:
+        return json.load(config)
 
 
 # Ensure that there is a viable secret key for the app to use for session encryption
@@ -46,7 +39,12 @@ def ensure_secret_key(forApp: Flask, keypath: str) -> None:
             forApp.secret_key = keyfile.read()
 
 
-def create_app(db_path: str) -> tuple[Flask, SQLAlchemy]:
+# Get settings from config file. This is outside the main block because the settings should
+# be globally accessible
+settings = get_config(CONFIG)
+
+
+def create_app() -> tuple[Flask, SQLAlchemy]:
     from .userviews import login_manager, userviews
     from .mainviews import mainviews
     from .evaluation import evalviews
@@ -56,7 +54,7 @@ def create_app(db_path: str) -> tuple[Flask, SQLAlchemy]:
 
     # Create and configure Flask object
     app = Flask(__name__)
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + db_path
+    app.config["SQLALCHEMY_DATABASE_URI"] = settings["db_uri"]
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # Initialize database mediator objects
@@ -72,16 +70,17 @@ def create_app(db_path: str) -> tuple[Flask, SQLAlchemy]:
     return app, db
 
 
-# Get settings from config file. This is outside the main block because the settings should
-# be globally accessible
-settings = get_config(CONFIG)
+# Replace settings with new settings. For use by other modules.
+def update_settings(new_conf: dict) -> None:
+    global settings
+    settings = new_conf
 
 
 if __name__ == "__main__":
     # Pass "debug" flag in bash to reset the database before and after each run
     flag_debug = settings.get("debug")
 
-    app, db = create_app(DB_PATH)
+    app, db = create_app()
     if flag_debug:
         db.drop_all()
 

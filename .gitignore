@@ -152,5 +152,7 @@ cython_debug/
 #.idea/
 
 config/key.txt
-**/*.db
+*.db
+*.db-journal
 app/data/
+app/test/
