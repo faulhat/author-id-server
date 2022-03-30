@@ -1,12 +1,20 @@
+from asyncio import subprocess
+import os
+import shutil
 import pytest
 import html
 
-from .main import create_app, get_config, update_settings
+from .main import create_app, get_config, update_settings, start_model_server
 
 
 @pytest.fixture(scope="session")
 def app():
     update_settings(get_config("test_config.json"))
+    from .main import settings
+
+    proc: subprocess.Popen = None
+    if settings.get("doStart"):
+        proc = start_model_server()
 
     app, db = create_app()
     app.config.update(
@@ -15,12 +23,19 @@ def app():
             "WTF_CSRF_ENABLED": False,
         }
     )
-    app.secret_key = "it don't matter"
+    app.secret_key = "planking at a candlelight vigil"
 
+    # Reset the database
     db.drop_all()
     db.create_all()
 
     yield app
+
+    # Cleanup
+    shutil.rmtree(settings["datadir"], ignore_errors=False)
+    shutil.rmtree(settings["tempdir"], ignore_errors=True)  # Doesn't always still exist
+    if proc is not None:
+        proc.kill()
 
 
 @pytest.fixture(scope="session")
@@ -146,7 +161,7 @@ def test_upload_image(client):
             data={
                 "name": "Doobs",
                 "attachment": image_fp,
-            }
+            },
         )
 
         print(res.data)
@@ -160,7 +175,7 @@ def test_compare_images(client):
             "/eval/query",
             data={
                 "attachment": image_fp,
-            }
+            },
         )
 
         print(res.data)

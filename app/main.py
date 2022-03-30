@@ -4,6 +4,7 @@
     This module is kind of like a conductor that coordinates them all.
 """
 
+import subprocess
 import json
 import sys
 import secrets
@@ -76,7 +77,24 @@ def update_settings(new_conf: dict) -> None:
     settings = new_conf
 
 
+# Start model server here
+def start_model_server() -> subprocess.Popen:
+    assert not settings.get("debug") # Will crash
+
+    proc = subprocess.Popen("./start_model_server.sh")
+    proc.wait()
+    return proc
+
+
+def kill_model_server(proc: subprocess.Popen):
+    proc.kill()
+
+
 if __name__ == "__main__":
+    proc: subprocess.Popen = None
+    if settings.get("doStart"):
+        proc = start_model_server()
+
     # Pass "debug" flag in bash to reset the database before and after each run
     flag_debug = settings.get("debug")
 
@@ -95,7 +113,10 @@ if __name__ == "__main__":
         else:
             app.run(port=port, debug=flag_debug)
     except:
+        raise
+    finally:
         if flag_debug:
             db.drop_all()
 
-        raise
+        if proc is not None:
+            proc.kill()

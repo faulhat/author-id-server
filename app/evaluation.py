@@ -82,7 +82,9 @@ def query_model() -> Response:
             distances = []
             for labelled in sample_evals:
                 compare_to = json.loads(labelled.fingerprint)
-                distances.append(np.linalg.norm(np.asarray(fingerprint) - np.asarray(compare_to)))
+                distances.append(
+                    np.linalg.norm(np.asarray(fingerprint) - np.asarray(compare_to))
+                )
 
             # Get the distances in ascending order while preserving knowledge of indices
             distances = sorted(list(enumerate(distances)), key=lambda t: t[1])

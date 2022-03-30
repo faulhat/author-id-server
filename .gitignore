@@ -156,3 +156,5 @@ config/key.txt
 *.db-journal
 app/data/
 app/test/
+author-id-model/
+SCTK/
