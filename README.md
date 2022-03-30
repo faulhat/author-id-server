@@ -14,7 +14,7 @@ pip install -r requirements.txt
 # Set up model server
 ./full_setup.sh
 
-# Execute main module in debug mode
+# Execute main module to serve the application
 python -m app.main
 ```
 
