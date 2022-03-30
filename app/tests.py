@@ -1,10 +1,9 @@
-from asyncio import subprocess
-import os
+import subprocess
 import shutil
 import pytest
 import html
 
-from .main import create_app, get_config, update_settings, start_model_server
+from .main import create_app, get_config, kill_port_user, update_settings, start_model_server
 
 
 @pytest.fixture(scope="session")
@@ -12,9 +11,8 @@ def app():
     update_settings(get_config("test_config.json"))
     from .main import settings
 
-    proc: subprocess.Popen = None
     if settings.get("doStart"):
-        proc = start_model_server()
+        start_model_server()
 
     app, db = create_app()
     app.config.update(
@@ -32,10 +30,9 @@ def app():
     yield app
 
     # Cleanup
-    shutil.rmtree(settings["datadir"], ignore_errors=False)
-    shutil.rmtree(settings["tempdir"], ignore_errors=True)  # Doesn't always still exist
-    if proc is not None:
-        proc.kill()
+    shutil.rmtree(settings["datadir"], ignore_errors=True) # Doesn't always exist
+    shutil.rmtree(settings["tempdir"], ignore_errors=True)
+    kill_port_user()
 
 
 @pytest.fixture(scope="session")

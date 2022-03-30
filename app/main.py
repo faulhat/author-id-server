@@ -9,6 +9,7 @@ import json
 import sys
 import secrets
 import os
+import time
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -77,23 +78,24 @@ def update_settings(new_conf: dict) -> None:
     settings = new_conf
 
 
+# Kill process using port required
+def kill_port_user():
+    subprocess.run(["fuser", f"{settings.get('modelServerPort')}/tcp", "--kill"])
+
+
 # Start model server here
-def start_model_server() -> subprocess.Popen:
+def start_model_server():
     assert not settings.get("debug") # Will crash
 
-    proc = subprocess.Popen("./start_model_server.sh")
-    proc.wait()
-    return proc
+    kill_port_user()    
+    subprocess.run("./start_model_server.sh")
 
-
-def kill_model_server(proc: subprocess.Popen):
-    proc.kill()
+    time.sleep(5) # Give tensorflow a few seconds to init
 
 
 if __name__ == "__main__":
-    proc: subprocess.Popen = None
     if settings.get("doStart"):
-        proc = start_model_server()
+        start_model_server()
 
     # Pass "debug" flag in bash to reset the database before and after each run
     flag_debug = settings.get("debug")
@@ -109,7 +111,7 @@ if __name__ == "__main__":
 
         port = settings.get("port")
         if port is None or not isinstance(port, int):
-            app.run(port=5001, debug=flag_debug)
+            app.run(port=8090, debug=flag_debug)
         else:
             app.run(port=port, debug=flag_debug)
     except:
@@ -118,5 +120,4 @@ if __name__ == "__main__":
         if flag_debug:
             db.drop_all()
 
-        if proc is not None:
-            proc.kill()
+        kill_port_user()
