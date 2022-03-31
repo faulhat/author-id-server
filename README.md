@@ -1,5 +1,7 @@
 # author-id-server
-Server that will allow web access to the author-id application
+Server that will allow web access to the author-id application.
+
+A frontend for the author-id-model program (https://github.com/tafaulhaber590/author-id-model), which will be downloaded and set up automatically by the full_setup.sh script.
 
 Build instructions:
 ```
