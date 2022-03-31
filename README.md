@@ -1,7 +1,7 @@
 # author-id-server
 Server that will allow web access to the author-id application
 
-Instructions for use:
+Build instructions:
 ```
 git clone https://github.com/tafaulhaber590/author-id-server/ --recurse-submodules
 cd author-id-server
@@ -13,7 +13,10 @@ pip install -r requirements.txt
 
 # Set up model server
 ./full_setup.sh
+```
 
+To run the program:
+```
 # Execute main module to serve the application
 python -m app.main
 ```
