@@ -41,6 +41,7 @@ def new_sample() -> Response:
 
             new_image = UserImage(current_user, image_fp)
             db.session.add(new_image)
+            db.session.commit()
 
             new_eval = SampleEval(
                 new_image,

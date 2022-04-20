@@ -6,5 +6,6 @@
     "datadir": "app/data/",
     "db_uri": "sqlite:///authorid.db",
     "debug": false,
-    "doStart": true
+    "doStart": true,
+    "test_user": true
 }

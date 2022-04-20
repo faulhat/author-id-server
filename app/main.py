@@ -6,19 +6,22 @@
 
 import subprocess
 import json
-import sys
 import secrets
 import os
 import time
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_uploads import configure_uploads
+
+from werkzeug.security import generate_password_hash
 
 CONF_DIR = "config/"
 KEYFILE = os.path.join(CONF_DIR, "key.txt")
 CONFIG = os.path.join(CONF_DIR, "config.json")
 DB_PATH = "authorid.db"
+
+TEST_USER_EMAIL = "user@test.com"
+TEST_USER_PW = "login"
 
 
 # Load configuration
@@ -94,6 +97,8 @@ def start_model_server():
 
 
 if __name__ == "__main__":
+    from .models import User
+
     if settings.get("doStart"):
         start_model_server()
 
@@ -108,6 +113,20 @@ if __name__ == "__main__":
         os.makedirs(CONF_DIR, exist_ok=True)
         ensure_secret_key(app, KEYFILE)
         db.create_all()
+
+        if settings.get("test_user"):
+            test_user = User.query.filter_by(email=TEST_USER_EMAIL).one_or_none()
+            if test_user is not None:
+                db.session.delete(test_user)
+                db.session.commit()
+
+            pw_hash = generate_password_hash(TEST_USER_PW)
+            test_user = User(email=TEST_USER_EMAIL, name="Test User", pw_hash=pw_hash)
+            db.session.add(test_user)
+            db.session.commit()
+
+            print(f"Test user email: {TEST_USER_EMAIL}")
+            print(f"Test user password: {TEST_USER_PW}")
 
         port = settings.get("port")
         if port is None or not isinstance(port, int):
