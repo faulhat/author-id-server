@@ -115,18 +115,21 @@ if __name__ == "__main__":
         db.create_all()
 
         if settings.get("test_user"):
-            test_user = User.query.filter_by(email=TEST_USER_EMAIL).one_or_none()
+            test_user_email = settings.get("test_user_email", TEST_USER_EMAIL)
+            test_user_pw = settings.get("test_user_pw", TEST_USER_PW)
+
+            test_user = User.query.filter_by(email=test_user_email).one_or_none()
             if test_user is not None:
                 db.session.delete(test_user)
                 db.session.commit()
 
-            pw_hash = generate_password_hash(TEST_USER_PW)
-            test_user = User(email=TEST_USER_EMAIL, name="Test User", pw_hash=pw_hash)
+            pw_hash = generate_password_hash(test_user_pw)
+            test_user = User(email=test_user_email, name="Test User", pw_hash=pw_hash)
             db.session.add(test_user)
             db.session.commit()
 
-            print(f"Test user email: {TEST_USER_EMAIL}")
-            print(f"Test user password: {TEST_USER_PW}")
+            print(f"Test user email: {test_user_email}")
+            print(f"Test user password: {test_user_pw}")
 
         port = settings.get("port")
         if port is None or not isinstance(port, int):

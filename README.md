@@ -23,4 +23,4 @@ To run the program:
 python -m app.main
 ```
 
-The app will serve on localhost:8090 by default. This can be changed in the config/config.json file.
+The app will serve on localhost:8090 by default. This can be changed in the config/config.json file. By default a test user will be created when you start the server. You can alter the credentials for this user in that config file as well.

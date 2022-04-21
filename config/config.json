@@ -7,5 +7,7 @@
     "db_uri": "sqlite:///authorid.db",
     "debug": false,
     "doStart": true,
-    "test_user": true
+    "test_user": true,
+    "test_user_email": "user@email.com",
+    "test_user_pw": "password"
 }
