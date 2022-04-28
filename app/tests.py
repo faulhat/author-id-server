@@ -3,12 +3,18 @@ import shutil
 import pytest
 import html
 
-from .main import create_app, get_config, kill_port_user, update_settings, start_model_server
+from .main import (
+    create_app,
+    get_config,
+    kill_port_user,
+    update_settings,
+    start_model_server,
+)
 
 
 @pytest.fixture(scope="session")
 def app():
-    update_settings(get_config("test_config.json"))
+    update_settings(get_config("config/test_config.json"))
     from .main import settings
 
     if settings.get("doStart"):
@@ -30,7 +36,7 @@ def app():
     yield app
 
     # Cleanup
-    shutil.rmtree(settings["datadir"], ignore_errors=True) # Doesn't always exist
+    shutil.rmtree(settings["datadir"], ignore_errors=True)  # Doesn't always exist
     shutil.rmtree(settings["tempdir"], ignore_errors=True)
     kill_port_user()
 

@@ -88,12 +88,35 @@ def kill_port_user():
 
 # Start model server here
 def start_model_server():
-    assert not settings.get("debug") # Will crash
+    assert not settings.get("debug")  # Will crash
 
-    kill_port_user()    
+    kill_port_user()
     subprocess.run("./start_model_server.sh")
 
-    time.sleep(5) # Give tensorflow a few seconds to init
+    time.sleep(5)  # Give tensorflow a few seconds to init
+
+
+class AppContextManager:
+    """
+        This context manager guarantees proper initialization and finalization
+        of the app state. This way, no messy try-finally block is necessary in the main block
+    """
+
+    def __init__(self, flag_debug):
+        self.flag_debug = flag_debug
+        self.app, self.db = create_app()
+
+    def __enter__(self):
+        if self.flag_debug:
+            self.db.drop_all()
+
+        return self
+    
+    def __exit__(self, *_):
+        if self.flag_debug:
+            self.db.drop_all()
+
+        kill_port_user()
 
 
 if __name__ == "__main__":
@@ -102,17 +125,14 @@ if __name__ == "__main__":
     if settings.get("doStart"):
         start_model_server()
 
-    # Pass "debug" flag in bash to reset the database before and after each run
+    # Set debug to true in config to clear the database before and after each run.
+    # You can also change the database URI in the config, so you can have multiple databases
+    # (e.g. one for testing and one for deployment)
     flag_debug = settings.get("debug")
-
-    app, db = create_app()
-    if flag_debug:
-        db.drop_all()
-
-    try:
+    with AppContextManager(flag_debug) as manager:
         os.makedirs(CONF_DIR, exist_ok=True)
-        ensure_secret_key(app, KEYFILE)
-        db.create_all()
+        ensure_secret_key(manager.app, KEYFILE)
+        manager.db.create_all()
 
         if settings.get("test_user"):
             test_user_email = settings.get("test_user_email", TEST_USER_EMAIL)
@@ -120,26 +140,19 @@ if __name__ == "__main__":
 
             test_user = User.query.filter_by(email=test_user_email).one_or_none()
             if test_user is not None:
-                db.session.delete(test_user)
-                db.session.commit()
+                manager.db.session.delete(test_user)
+                manager.db.session.commit()
 
             pw_hash = generate_password_hash(test_user_pw)
             test_user = User(email=test_user_email, name="Test User", pw_hash=pw_hash)
-            db.session.add(test_user)
-            db.session.commit()
+            manager.db.session.add(test_user)
+            manager.db.session.commit()
 
             print(f"Test user email: {test_user_email}")
             print(f"Test user password: {test_user_pw}")
 
         port = settings.get("port")
         if port is None or not isinstance(port, int):
-            app.run(port=8090, debug=flag_debug)
+            manager.app.run(port=8090, debug=flag_debug)
         else:
-            app.run(port=port, debug=flag_debug)
-    except:
-        raise
-    finally:
-        if flag_debug:
-            db.drop_all()
-
-        kill_port_user()
+            manager.app.run(port=port, debug=flag_debug)

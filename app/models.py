@@ -54,7 +54,7 @@ class UserImage(db.Model):
 
         # Generate a path unique enough that collisions are impossible
         image_fp.seek(0)
-        digest = hashlib.sha1(image_fp.read()).hexdigest()[:20]
+        digest = hashlib.sha1(image_fp.read()).hexdigest()
         self.image_path = os.path.join(directory, f"{digest}.png")
         self.thumbnail_path = os.path.join(directory, f"{digest}.thumbnail.png")
         with Image.open(image_fp) as image:
