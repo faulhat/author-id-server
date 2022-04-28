@@ -1,49 +1,51 @@
-import subprocess
 import shutil
+from flask_login import login_user
 import pytest
 import html
 
+from werkzeug.security import generate_password_hash
+
 from .main import (
-    create_app,
+    AppContextManager,
     get_config,
-    kill_port_user,
     update_settings,
     start_model_server,
 )
 
 
 @pytest.fixture(scope="session")
-def app():
+def manager():
     update_settings(get_config("config/test_config.json"))
     from .main import settings
 
-    if settings.get("doStart"):
-        start_model_server()
+    with AppContextManager(True) as manager:
+        if settings.get("doStart"):
+            start_model_server()
 
-    app, db = create_app()
-    app.config.update(
-        {
-            "TESTING": True,
-            "WTF_CSRF_ENABLED": False,
-        }
-    )
-    app.secret_key = "planking at a candlelight vigil"
+        manager.app.config.update(
+            {
+                "TESTING": True,
+                "WTF_CSRF_ENABLED": False,
+            }
+        )
+        manager.app.secret_key = "planking at a candlelight vigil"
 
-    # Reset the database
-    db.drop_all()
-    db.create_all()
+        yield manager
 
-    yield app
-
-    # Cleanup
-    shutil.rmtree(settings["datadir"], ignore_errors=True)  # Doesn't always exist
-    shutil.rmtree(settings["tempdir"], ignore_errors=True)
-    kill_port_user()
+        # Cleanup
+        shutil.rmtree(settings["datadir"], ignore_errors=True)  # Doesn't always exist
+        shutil.rmtree(settings["tempdir"], ignore_errors=True)
 
 
 @pytest.fixture(scope="session")
-def client(app):
-    return app.test_client()
+def client(manager):
+    return manager.app.test_client()
+
+
+@pytest.fixture(scope="session")
+def context(manager):
+    with manager.app.app_context() as context:
+        yield context
 
 
 def test_field_required(client):
@@ -184,3 +186,23 @@ def test_compare_images(client):
         print(res.data)
         assert res.status_code == 200
         assert b"</ol>" in res.data
+
+
+def test_del_sample(manager, client):
+    from .models import SampleEval
+
+    with manager.app.app_context():
+        # First sample must belong to the current user, since no other user
+        # could have uploaded any samples
+        sample = SampleEval.query.first()
+        assert sample is not None
+
+        res = client.get("/eval/new")
+        assert res.status_code == 200
+        assert str(sample.id) in res.get_data(as_text=True)
+
+        res = client.get(f"/eval/del/{sample.id}", follow_redirects=True)
+
+        print(res.data)
+        assert res.status_code == 200
+        assert str(sample.id) not in res.get_data(as_text=True)

@@ -24,31 +24,23 @@ def index() -> Response:
 @mainviews.route("/image/<int:image_id>")
 @login_required
 def get_image(image_id: int) -> Response:
-    image = (
-        UserImage.query.filter_by(id=image_id)
-        .filter_by(user=current_user)
-        .one_or_none()
-    )
-    if image is not None:
-        with open(image.image_path, "rb") as image_fp:
-            return Response(image_fp.read(), mimetype="image")
+    image = UserImage.query.get_or_404(image_id)
+    if image.user != current_user:
+        abort(401)
 
-    abort(404)
+    with open(image.image_path, "rb") as image_fp:
+        return Response(image_fp.read(), mimetype="image")
 
 
 @mainviews.route("/image/<int:image_id>/thumbnail")
 @login_required
 def get_thumbnail(image_id: int) -> Response:
-    image = (
-        UserImage.query.filter_by(id=image_id)
-        .filter_by(user=current_user)
-        .one_or_none()
-    )
-    if image is not None:
-        with open(image.thumbnail_path, "rb") as image_fp:
-            return Response(image_fp.read(), mimetype="image")
+    image = UserImage.query.get_or_404(image_id)
+    if image.user != current_user:
+        abort(401)
 
-    abort(404)
+    with open(image.thumbnail_path, "rb") as image_fp:
+        return Response(image_fp.read(), mimetype="image")
 
 
 @mainviews.app_errorhandler(404)

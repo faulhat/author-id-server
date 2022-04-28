@@ -8,9 +8,14 @@
     {% include "form.html" with context %}
     
     {% if ranked %}
-        <ol class="list-group">
+        <ol class="list-group content-container">
             {% for evaluation in ranked %}
-                {% include "eval/render_eval.html" with context %}
+                <li class="list-item content-container">
+                    {{ evaluation.name }}<br>
+                    <a href="/image/{{ evaluation.image_id }}">
+                        <img src="/image/{{ evaluation.image_id }}/thumbnail">
+                    </a>
+                </li>
             {% endfor %}
         </ol>
     {% endif %}

@@ -8,8 +8,9 @@ import traceback
 from typing import BinaryIO
 import requests
 import numpy as np
+import os
 
-from flask import Blueprint, Response, make_response, render_template
+from flask import Blueprint, Response, make_response, redirect, render_template, abort, url_for
 from flask_login import current_user, login_required
 
 from .models import UserImage, db, SampleEval
@@ -67,6 +68,27 @@ def new_sample() -> Response:
         return render_template("eval/labelled.html", form=form)
 
     return render_template("eval/labelled.html", form=form, list_evals=user_evals)
+
+
+# Delete a previously uploaded sample
+@evalviews.route("/del/<int:sample_id>")
+@login_required
+def del_sample(sample_id: int) -> Response:
+    sample = SampleEval.query.get_or_404(sample_id)
+    if sample.user != current_user:
+        abort(401)
+    
+    if os.path.exists(sample.image.image_path):
+        os.remove(sample.image.image_path)
+    
+    if os.path.exists(sample.image.thumbnail_path):
+        os.remove(sample.image.thumbnail_path)
+    
+    db.session.delete(sample.image)
+    db.session.delete(sample)
+    db.session.commit()
+
+    return redirect(url_for(".new_sample"))
 
 
 # Get a ranked candidate list for an unlabelled sample

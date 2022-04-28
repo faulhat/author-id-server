@@ -102,18 +102,19 @@ class AppContextManager:
         of the app state. This way, no messy try-finally block is necessary in the main block
     """
 
-    def __init__(self, flag_debug):
-        self.flag_debug = flag_debug
+    def __init__(self, flag_drop_all):
+        self.flag_drop_all = flag_drop_all
         self.app, self.db = create_app()
 
     def __enter__(self):
-        if self.flag_debug:
+        if self.flag_drop_all:
             self.db.drop_all()
 
+        self.db.create_all()
         return self
     
     def __exit__(self, *_):
-        if self.flag_debug:
+        if self.flag_drop_all:
             self.db.drop_all()
 
         kill_port_user()
@@ -132,7 +133,6 @@ if __name__ == "__main__":
     with AppContextManager(flag_debug) as manager:
         os.makedirs(CONF_DIR, exist_ok=True)
         ensure_secret_key(manager.app, KEYFILE)
-        manager.db.create_all()
 
         if settings.get("test_user"):
             test_user_email = settings.get("test_user_email", TEST_USER_EMAIL)

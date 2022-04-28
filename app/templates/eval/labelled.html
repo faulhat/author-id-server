@@ -10,9 +10,16 @@
     {% include "form.html" with context %}
 
     {% if list_evals %}
-        <ul class="list-group">
+        <ul class="list-group content-container">
             {% for evaluation in list_evals %}
-                {% include "eval/render_eval.html" with context %}
+                <li class="list-item content-container">
+                    {{ evaluation.name }}<br>
+                    <a href="/image/{{ evaluation.image_id }}">
+                        <img src="/image/{{ evaluation.image_id }}/thumbnail">
+                    </a><br>
+
+                    <a href="/eval/del/{{ evaluation.id }}">Delete</a>
+                </li>
             {% endfor %}
         </ul>
     {% endif %}
