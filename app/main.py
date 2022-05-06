@@ -98,8 +98,8 @@ def start_model_server():
 
 class AppContextManager:
     """
-        This context manager guarantees proper initialization and finalization
-        of the app state. This way, no messy try-finally block is necessary in the main block
+    This context manager guarantees proper initialization and finalization
+    of the app state. This way, no messy try-finally block is necessary in the main block
     """
 
     def __init__(self, flag_drop_all):
@@ -112,7 +112,7 @@ class AppContextManager:
 
         self.db.create_all()
         return self
-    
+
     def __exit__(self, *_):
         if self.flag_drop_all:
             self.db.drop_all()

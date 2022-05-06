@@ -18,5 +18,9 @@
                 </li>
             {% endfor %}
         </ol>
+    {% else %}
+        <ol class="list-group content-container">
+            You have no labelled samples uploaded.
+        </ol>
     {% endif %}
 {% endblock %}

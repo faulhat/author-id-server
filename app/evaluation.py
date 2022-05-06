@@ -10,7 +10,15 @@ import requests
 import numpy as np
 import os
 
-from flask import Blueprint, Response, make_response, redirect, render_template, abort, url_for
+from flask import (
+    Blueprint,
+    Response,
+    make_response,
+    redirect,
+    render_template,
+    abort,
+    url_for,
+)
 from flask_login import current_user, login_required
 
 from .models import UserImage, db, SampleEval
@@ -77,13 +85,13 @@ def del_sample(sample_id: int) -> Response:
     sample = SampleEval.query.get_or_404(sample_id)
     if sample.user != current_user:
         abort(401)
-    
+
     if os.path.exists(sample.image.image_path):
         os.remove(sample.image.image_path)
-    
+
     if os.path.exists(sample.image.thumbnail_path):
         os.remove(sample.image.thumbnail_path)
-    
+
     db.session.delete(sample.image)
     db.session.delete(sample)
     db.session.commit()
@@ -96,11 +104,11 @@ def del_sample(sample_id: int) -> Response:
 @login_required
 def query_model() -> Response:
     form = UnlabelledSampleForm()
+    sample_evals = current_user.samples
     if form.validate_on_submit():
         try:
             image_fp = form.attachment.data
             fingerprint = get_img_fingerprint(image_fp)
-            sample_evals = current_user.samples
 
             distances = []
             for labelled in sample_evals:
@@ -126,4 +134,4 @@ def query_model() -> Response:
                 500,
             )
 
-    return render_template("eval/query.html", form=form)
+    return render_template("eval/query.html", form=form, ranked=sample_evals)
